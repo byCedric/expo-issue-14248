@@ -1,0 +1,51 @@
+name: Classic Build
+on:
+  workflow_dispatch:
+    inputs:
+      sdk:
+        description: Expo SDK version to use (e.g. "42")
+        required: false
+        default: '42'
+jobs:
+  build:
+    name: Build app
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🏗 Setup repo
+        uses: actions/checkout@v2
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - name: 🏗 Setup Expo CLI
+        uses: expo/expo-github-action@v6
+        with:
+          expo-version: latest
+          expo-cache: true
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: 🔎 Find yarn cache
+        id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: ♻️ Restore yarn cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: 📦 Install dependencies
+        run: yarn install --frozen-lockfile --check-files
+      - name: 👷‍♀️ Upgrade to Expo SDK ${{ github.event.inputs.sdk }}
+        run: |
+          expo upgrade ${{ github.event.inputs.sdk }} --non-interactive
+          cat package.json
+      - name: 🚀 Build app
+        run: expo build:android -t apk
+      - name: 📱 Download app
+        run: curl -L -o app.apk $(expo build:status | grep -m 1 'APK:' | awk '{print $2}')
+      - name: 📱 Save app
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-${{ github.event.inputs.sdk }}.apk
+          path: app.apk
+
