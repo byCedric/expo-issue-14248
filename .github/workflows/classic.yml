@@ -36,13 +36,13 @@ jobs:
       - name: 📦 Install dependencies
         run: yarn install --frozen-lockfile --check-files
       - name: 👷‍♀️ Upgrade to Expo SDK ${{ github.event.inputs.sdk }}
-        run: |
-          expo upgrade ${{ github.event.inputs.sdk }} --non-interactive
-          cat package.json
+        run: expo upgrade ${{ github.event.inputs.sdk }} --non-interactive
+      - name: 📋 Check package.json
+        run: cat package.json
       - name: 🚀 Build app
         run: expo build:android -t apk
       - name: 📱 Download app
-        run: curl -L -o app.apk $(expo build:status | grep -m 1 'APK:' | awk '{print $2}')
+        run: curl -L -o app.apk $(expo build:status | grep -m 1 'APK:' | awk '{print $3}')
       - name: 📱 Save app
         uses: actions/upload-artifact@v2
         with:
