@@ -20,6 +20,8 @@
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 1,
+      "package": "com.bycedric.expoissue14248",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
